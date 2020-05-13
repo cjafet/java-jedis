@@ -19,8 +19,8 @@ public class RedisService {
 
     @Autowired
     public RedisService() {
-        jedis = new Jedis("192.168.99.100", 6379);
-        jedis.auth("2wsxXSW@");
+        jedis = new Jedis(host, Integer.parseInt(port));
+        jedis.auth(password);
     }
 
     public Integer AddPoints(String userName, Integer points) {
