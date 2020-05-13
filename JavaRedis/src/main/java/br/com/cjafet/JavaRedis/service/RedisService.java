@@ -63,11 +63,16 @@ public class RedisService {
     public Map<String, Integer> GetUserData(String userName) {
         Map<String, Integer> user = new HashMap<String, Integer>();
 
-        Integer userScore = redisClient.GetUserScore(userName);
-        user.put("score", userScore);
+        try {
+            Integer userScore = redisClient.GetUserScore(userName);
+            user.put("score", userScore);
 
-        Long userRank = redisClient.GetUserPosition(userName);
-        user.put("position", userRank.intValue());
+            Long userRank = redisClient.GetUserPosition(userName);
+            user.put("position", userRank.intValue());
+        } catch (Exception e) {
+            user = null;
+        }
+
 
         return user;
     }
