@@ -77,7 +77,15 @@ public class RedisService {
     }
 
     public Integer GetUserScore(String userName) {
-        return redisClient.GetUserScore(userName);
+        Integer userScore;
+
+        try {
+            userScore = redisClient.GetUserScore(userName);
+        } catch (Exception e) {
+            userScore = null;
+        }
+
+        return userScore;
     }
 
 
