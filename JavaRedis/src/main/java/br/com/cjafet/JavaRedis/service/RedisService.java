@@ -13,23 +13,27 @@ public class RedisService {
 
     private final String KEY = "leaderboard";
     private Jedis jedis;
+    private String host = System.getenv("host");
+    private String port = System.getenv("port");
+    private String password = System.getenv("password");
 
     @Autowired
     public RedisService() {
-        String host = System.getenv("host");
-        String port = System.getenv("port");
-        String password = System.getenv("password");
-
-        jedis = new Jedis(host, Integer.parseInt(port));
-        jedis.auth(password);
+        jedis = new Jedis("192.168.99.100", 6379);
+        jedis.auth("2wsxXSW@");
     }
 
     public Integer AddPoints(String userName, Integer points) {
-        Integer userScore = this.GetUserScore(userName);
 
-        Integer newUserScore = userScore != null
-                ? userScore + points
-                : points;
+        Integer newUserScore;
+        Long member = this.IsMember(userName);
+
+        if(member != null) {
+            Integer userScore = this.GetUserScore(userName);
+            newUserScore = userScore + points;
+        } else {
+            newUserScore = points;
+        }
 
         this.InsertOrUpdateUserScore(newUserScore, userName);
 
@@ -95,4 +99,7 @@ public class RedisService {
 
     }
 
+    public Long IsMember(String userName) {
+        return jedis.zrank(KEY, userName);
+    }
 }
