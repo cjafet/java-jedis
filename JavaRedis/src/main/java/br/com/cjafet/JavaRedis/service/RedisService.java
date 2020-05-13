@@ -1,58 +1,49 @@
 package br.com.cjafet.JavaRedis.service;
 
+import br.com.cjafet.JavaRedis.client.RedisClient;
 import br.com.cjafet.JavaRedis.comparator.UserScoreComparator;
 import br.com.cjafet.JavaRedis.model.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
 
 import java.util.*;
 
 @Service
 public class RedisService {
 
-    private final String KEY = "leaderboard";
-    private Jedis jedis;
-    private String host = System.getenv("host");
-    private String port = System.getenv("port");
-    private String password = System.getenv("password");
+    private RedisClient redisClient;
 
     @Autowired
-    public RedisService() {
-        jedis = new Jedis(host, Integer.parseInt(port));
-        jedis.auth(password);
+    public RedisService(RedisClient redisClient) {
+        this.redisClient = redisClient;
     }
 
     public Integer AddPoints(String userName, Integer points) {
 
         Integer newUserScore;
-        Long member = this.IsMember(userName);
+        Long member = redisClient.IsMember(userName);
 
         if(member != null) {
-            Integer userScore = this.GetUserScore(userName);
+            Integer userScore = redisClient.GetUserScore(userName);
             newUserScore = userScore + points;
         } else {
             newUserScore = points;
         }
 
-        this.InsertOrUpdateUserScore(newUserScore, userName);
+        redisClient.InsertOrUpdateUserScore(newUserScore, userName);
 
-        return this.GetUserScore(userName);
-    }
-
-    public Set<String> List() {
-        return jedis.zrange(KEY, 0, 2);
+        return redisClient.GetUserScore(userName);
     }
 
     public Map<String, List<UserDTO>> ListWithScore() {
 
-        Set<String> members = jedis.zrangeByScore(KEY, "0", "20000");
+        Set<String> members = redisClient.getMembersByRank();
 
         List<UserDTO> leaderBoard = new ArrayList<>();
 
         for (String member : members) {
-            Integer score = this.GetUserScore(member);
-            Long position = this.GetUserPosition(member);
+            Integer score = redisClient.GetUserScore(member);
+            Long position = redisClient.GetUserPosition(member);
 
             UserDTO user = new UserDTO(member, score, position);
 
@@ -72,34 +63,22 @@ public class RedisService {
     public Map<String, Integer> GetUserData(String userName) {
         Map<String, Integer> user = new HashMap<String, Integer>();
 
-        Integer userScore = this.GetUserScore(userName);
+        Integer userScore = redisClient.GetUserScore(userName);
         user.put("score", userScore);
 
-        Long userRank = this.GetUserPosition(userName);
+        Long userRank = redisClient.GetUserPosition(userName);
         user.put("position", userRank.intValue());
 
         return user;
     }
 
-    public Long InsertOrUpdateUserScore(Integer userScore, String userName) {
-        return jedis.zadd(KEY, userScore, userName);
+    public Long GetNumberOfMembers() {
+        return redisClient.NumberOfMembers();
     }
 
     public Integer GetUserScore(String userName) {
-        return jedis.zscore(KEY, userName).intValue();
+        return redisClient.GetUserScore(userName);
     }
 
-    public long GetUserPosition(String userName) {
-       return jedis.zrevrank(KEY, userName) + 1;
 
-    }
-
-    public Long NumberOfMembers() {
-        return jedis.zcount(KEY, "0", "100000");
-
-    }
-
-    public Long IsMember(String userName) {
-        return jedis.zrank(KEY, userName);
-    }
 }

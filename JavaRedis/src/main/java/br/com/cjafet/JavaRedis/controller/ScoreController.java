@@ -42,7 +42,7 @@ public class ScoreController {
 
     @GetMapping("/members")
     public Long getNumberOfUsers() {
-        return redisService.NumberOfMembers();
+        return redisService.GetNumberOfMembers();
     }
 
 }

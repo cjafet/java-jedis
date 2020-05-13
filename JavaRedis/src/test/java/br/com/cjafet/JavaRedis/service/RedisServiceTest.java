@@ -1,44 +1,41 @@
 package br.com.cjafet.JavaRedis.service;
 
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.AfterAll;
+import br.com.cjafet.JavaRedis.client.RedisClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import redis.clients.jedis.Jedis;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RedisServiceTest {
 
-    private static String host = System.getenv("host");
-    private static String port = System.getenv("port");
-    private static String password = System.getenv("password");
-    private static Jedis jedis = new Jedis(host, Integer.parseInt(port));
-    private static final String KEY = "leaderboard";
+
+    private static RedisClient redisClient;
+    private static RedisService redisService;
+
 
     @BeforeAll
     public static void setup() {
-        jedis.auth(password);
-        jedis.zrem(KEY, "TestUser");
+        redisClient = new RedisClient();
+        redisService = new RedisService(redisClient);
+        redisClient.RemoveUser("TestUser");
     }
 
     @Test
     void addPointsToNull() {
-        RedisService redisService = new RedisService();
 
         redisService.AddPoints("TestUser", 200);
 
-        assertEquals(200, redisService.GetUserScore("TestUser"));
+        assertEquals(200, redisClient.GetUserScore("TestUser"));
 
     }
 
     @Test
     void addPointsShouldUpdateScore() {
-        RedisService redisService = new RedisService();
 
         redisService.AddPoints("TestUser", 200);
 
-        assertEquals(400, redisService.GetUserScore("TestUser"));
+        assertEquals(400, redisClient.GetUserScore("TestUser"));
     }
 
     @Test
