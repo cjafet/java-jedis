@@ -1,7 +1,7 @@
 package br.com.cjafet.JavaRedis.service;
 
 import br.com.cjafet.JavaRedis.client.RedisClient;
-import br.com.cjafet.JavaRedis.comparator.UserScoreComparator;
+import br.com.cjafet.JavaRedis.comparator.UserDTOScoreComparator;
 import br.com.cjafet.JavaRedis.model.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +12,7 @@ import java.util.*;
 public class RedisService {
 
     private RedisClient redisClient;
+    private SortedSet<UserDTO> set;
 
     @Autowired
     public RedisService(RedisClient redisClient) {
@@ -50,7 +51,7 @@ public class RedisService {
             leaderBoard.add(user);
         }
 
-        UserScoreComparator userScoreComparator = new UserScoreComparator();
+        UserDTOScoreComparator userScoreComparator = new UserDTOScoreComparator();
         leaderBoard.sort(userScoreComparator);
 
         Map<String, List<UserDTO>> highScores = new HashMap<>();

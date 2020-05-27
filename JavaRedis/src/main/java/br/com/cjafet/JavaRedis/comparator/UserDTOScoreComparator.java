@@ -1,10 +1,9 @@
 package br.com.cjafet.JavaRedis.comparator;
 
 import br.com.cjafet.JavaRedis.model.UserDTO;
-
 import java.util.Comparator;
 
-public class UserScoreComparator implements Comparator<UserDTO> {
+public class UserDTOScoreComparator implements Comparator<UserDTO> {
 
     @Override
     public int compare(UserDTO firstUser, UserDTO secondUser) {
